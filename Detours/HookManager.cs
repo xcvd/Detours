@@ -29,17 +29,8 @@ namespace Detours
     /// <summary>
     /// Manages all hooks.
     /// </summary>
-    public static class HookManager
+    public class HookManager : Dictionary<string, Hook>
     {
-        #region Constants and Fields
-
-        /// <summary>
-        /// Gets Hooks.
-        /// </summary>
-        internal static readonly Dictionary<string, Hook> Hooks = new Dictionary<string, Hook>();
-
-        #endregion
-
         #region Public Methods and Operators
 
         /// <summary>
@@ -54,35 +45,9 @@ namespace Detours
         /// <param name="name">
         ///   The name of the hook.
         /// </param>
-        public static void Add(Delegate target, Delegate hook, string name)
+        public void Add(Delegate target, Delegate hook, string name)
         {
-            Hooks.Add(name, new Hook(target, hook));
-        }
-
-        /// <summary>
-        /// Calls the original function, and returns a return value.
-        /// </summary>
-        /// <param name="name">
-        ///   The name. 
-        /// </param>       
-        /// <param name="args">
-        ///   The arguments to pass. If it is a 'void' argument list,
-        ///   you must pass 'null'.
-        /// </param>
-        /// <returns>
-        /// An object containing the original functions return value.
-        /// </returns>
-        public static object CallOriginal(string name, params object[] args)
-        {
-            return Hooks[name].CallOriginal(args);
-        }
-
-        /// <summary>
-        /// Clears all hooks from the hook manager.
-        /// </summary>
-        public static void Clear()
-        {
-            Hooks.Clear();            
+            this.Add(name, new Hook(target, hook));
         }
 
         /// <summary>
@@ -97,15 +62,15 @@ namespace Detours
         /// <exception cref="HookInstallFailedException">
         /// Thrown if the named hook fails to installs.
         /// </exception>
-        public static void Install(string name)
+        public void Install(string name)
         {
-            if (!Hooks.ContainsKey(name))
+            if (!this.ContainsKey(name))
             {
                 throw new HookNotFoundException(
                     "The hook " + name + " could not be found. Verify that you have added the hook " + name + ".");
             }
 
-            if (!Hooks[name].Install())
+            if (!this[name].Install())
             {
                 throw new HookInstallFailedException(
                     "The hook " + name + " failed to install. Verify addresses are correct.");
@@ -118,9 +83,9 @@ namespace Detours
         /// <exception cref="HookInstallFailedException">
         /// Thrown if the certain hook fails to installs.
         /// </exception>
-        public static void InstallAll()
+        public void InstallAll()
         {
-            foreach (var hook in Hooks.Where(hook => !hook.Value.Install()))
+            foreach (var hook in this.Where(hook => !hook.Value.Install()))
             {
                 throw new HookInstallFailedException(
                     "The hook " + hook.Key + " failed to install. Verify addresses are correct.");
@@ -133,14 +98,14 @@ namespace Detours
         /// <param name="name">
         ///   The name of the hook.
         /// </param>
-        public static void Remove(string name)
+        public new void Remove(string name)
         {
-            if (Hooks[name].IsInstalled)
+            if (this[name].IsInstalled)
             {
                 Uninstall(name);
             }
 
-            Hooks.Remove(name);
+            base.Remove(name);
         }
 
         /// <summary>
@@ -155,15 +120,15 @@ namespace Detours
         /// <exception cref="HookUninstallFailedException">
         /// Thrown if the named hook fails to uninstall.
         /// </exception>
-        public static void Uninstall(string name)
+        public void Uninstall(string name)
         {
-            if (!Hooks.ContainsKey(name))
+            if (!this.ContainsKey(name))
             {
                 throw new HookNotFoundException(
                     "The hook " + name + " could not be found. Verify that you have added the hook " + name + ".");
             }
 
-            if (!Hooks[name].Uninstall())
+            if (!this[name].Uninstall())
             {
                 throw new HookUninstallFailedException(
                     "The hook " + name + " failed to uninstall. Very addresses are correct.");
@@ -176,9 +141,9 @@ namespace Detours
         /// <exception cref="HookUninstallFailedException">
         /// Thrown if the certain hook fails to installs.
         /// </exception>
-        public static void UninstallAll()
+        public void UninstallAll()
         {
-            foreach (var hook in Hooks.Where(hook => !hook.Value.Uninstall()))
+            foreach (var hook in this.Where(hook => !hook.Value.Uninstall()))
             {
                 throw new HookUninstallFailedException(
                     "The hook " + hook.Key + " failed to uninstall. Verify addresses are correct.");
