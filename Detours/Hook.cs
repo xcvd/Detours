@@ -70,7 +70,7 @@ namespace Detours
         /// <param name="hook">
         ///   The hook.
         /// </param>
-        internal Hook(Delegate target, Delegate hook)
+        public Hook(Delegate target, Delegate hook)
         {            
             this.target = Marshal.GetFunctionPointerForDelegate(target);
             this.targetDelegate = target;
@@ -109,7 +109,7 @@ namespace Detours
         /// <returns>
         /// An object containing the original functions return value.
         /// </returns>
-        internal object CallOriginal(params object[] args)
+        public object CallOriginal(params object[] args)
         {
             this.Uninstall();
             var ret = this.targetDelegate.DynamicInvoke(args);
@@ -123,7 +123,7 @@ namespace Detours
         /// <returns>
         /// Whether the operation was successful.
         /// </returns>
-        internal bool Install()
+        public bool Install()
         {
             try
             {
@@ -142,7 +142,7 @@ namespace Detours
         /// <returns>
         /// Whether the operation was successful.
         /// </returns>
-        internal bool Uninstall()
+        public bool Uninstall()
         {
             try
             {
